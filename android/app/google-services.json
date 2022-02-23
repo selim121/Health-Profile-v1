@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "765009838511",
+    "project_id": "health-profile-cbf60",
+    "storage_bucket": "health-profile-cbf60.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:765009838511:android:ea83c80e9c4b48dca5ef5a",
+        "android_client_info": {
+          "package_name": "com.example.health_profile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "765009838511-bbicvq6n2293a94sfbu48m2ao6l1tfme.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBC89hHsb1L6fZoBmbYOmdI43izdrvvMDI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "765009838511-bbicvq6n2293a94sfbu48m2ao6l1tfme.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "765009838511-qq95kr5udh2bv29anku1nhbf3f6a4hq0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.healthProfile"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
