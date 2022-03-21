@@ -1,15 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:path/path.dart';import 'dart:io';
 import 'package:path/path.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
-
 import '../resources/firebase_api.dart';
+import '../screens/login_screen.dart';
 import '../widgets/button_widgets.dart';
 import 'pdf_viewer.dart';
+
 
 class UploadPage extends StatefulWidget {
   const UploadPage({Key? key}) : super(key: key);
@@ -27,25 +28,139 @@ class _UploadPageState extends State<UploadPage> {
     }));
   }
 
+  bool _isLoading = false;
+  var userData = {};
+
+  getData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      var userSnap = await FirebaseFirestore.instance
+          .collection('users data')
+          .doc(FirebaseAuth.instance.currentUser!.email.toString())
+          .get();
+
+      userData = userSnap.data()!;
+
+      // get post lENGTH
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getData();
+  }
+
   @override
   Widget build(BuildContext context) {
     final fileName = file != null ? basename(file!.path) : 'No File Selected';
 
-    return Scaffold(
+    return userData['role'] == 'Admin'
+        ? Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.teal.shade900,
         title: const Text('Upload files'),
         centerTitle: true,
-        /*actions: [
-          ElevatedButton(
-              onPressed: () async {
-                const url = 'files/vaccine certificate.pdf';
-                final file = await FirebaseApi.loadFirebase(url);
-
-                if (file == null) return;
-                openPDF(context, file);
+        // actions: [
+        //   ElevatedButton(
+        //       onPressed: () async {
+        //         const url = 'files/vaccine certificate.pdf';
+        //         final file = await FirebaseApi.loadFirebase(url);
+        //
+        //         if (file == null) return;
+        //         openPDF(context, file);
+        //       },
+        //       child: Text('View pdf'))
+        // ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            UserAccountsDrawerHeader(
+              decoration: const BoxDecoration(color: Colors.white),
+              accountName: Container(
+                  child: const Text(
+                    'XYZ',
+                    style: TextStyle(color: Colors.black),
+                  )),
+              accountEmail: Container(
+                  child: Text(
+                    FirebaseAuth.instance.currentUser!.email.toString(),
+                    style: TextStyle(color: Colors.black),
+                  )),
+              // currentAccountPicture: Stack(
+              //   children: [
+              //     _image != null
+              //         ? CircleAvatar(
+              //             radius: 64,
+              //             backgroundImage: MemoryImage(_image!),
+              //           )
+              //         : const CircleAvatar(
+              //             radius: 64,
+              //             backgroundImage: NetworkImage(
+              //               'https://thumbs.dreamstime.com/z/businessman-icon-image-male-avatar-profile-vector-glasses-beard-hairstyle-179728610.jpg',
+              //             ),
+              //           ),
+              //     Positioned(
+              //         bottom: -5,
+              //         left: 80,
+              //         child: IconButton(
+              //           icon: const Icon(Icons.add_a_photo),
+              //           color: Colors.teal,
+              //           onPressed: () {},
+              //         ))
+              //   ],
+              // ),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            // ListTile(
+            //   leading: const Icon(Icons.person),
+            //   title: const Text('Profile'),
+            //   onTap: () {
+            //     Navigator.push(context,
+            //         MaterialPageRoute(builder: (context) {
+            //       return DoctorProfile();
+            //     }));
+            //   },
+            // ),
+            // ListTile(
+            //   leading: const Icon(Icons.settings),
+            //   title: const Text('Update profile info'),
+            //   onTap: () {
+            //     Navigator.push(context,
+            //         MaterialPageRoute(builder: (context) {
+            //       return DoctorProfileUpdateScreen();
+            //     }));
+            //   },
+            // ),
+            const SizedBox(height: 10),
+            ListTile(
+              leading: Icon(Icons.logout),
+              onTap: () {
+                FirebaseAuth.instance.signOut();
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) {
+                      return LoginScreen();
+                    }));
               },
-              child: Text('View pdf'))
-        ],*/
+              title: Text('Logout'),
+            )
+          ],
+        ),
       ),
       body: Container(
         padding: const EdgeInsets.all(32),
@@ -76,6 +191,14 @@ class _UploadPageState extends State<UploadPage> {
               task != null ? buildUploadStatus(task!) : Container(),
             ],
           ),
+        ),
+      ),
+    )
+        : const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(
+          backgroundColor: Colors.grey,
+          color: Colors.green,
         ),
       ),
     );
@@ -110,20 +233,20 @@ class _UploadPageState extends State<UploadPage> {
   }
 
   Widget buildUploadStatus(UploadTask task) => StreamBuilder<TaskSnapshot>(
-        stream: task.snapshotEvents,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final snap = snapshot.data!;
-            final progress = snap.bytesTransferred / snap.totalBytes;
-            final percentage = (progress * 100).toStringAsFixed(2);
+    stream: task.snapshotEvents,
+    builder: (context, snapshot) {
+      if (snapshot.hasData) {
+        final snap = snapshot.data!;
+        final progress = snap.bytesTransferred / snap.totalBytes;
+        final percentage = (progress * 100).toStringAsFixed(2);
 
-            return Text(
-              '$percentage %',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            );
-          } else {
-            return Container();
-          }
-        },
-      );
+        return Text(
+          '$percentage %',
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        );
+      } else {
+        return Container();
+      }
+    },
+  );
 }

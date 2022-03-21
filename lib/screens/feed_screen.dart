@@ -1,13 +1,15 @@
 import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../prescription/prescription_page.dart';
+
+import '../doctor/docrtor_scan_page.dart';
 import '../profile/profile.dart';
-import '../profile_info.dart';
+import '../profile/profile_update_screen.dart';
 import '../qr/qr_share_page.dart';
 import 'history_page.dart';
-import 'home_page.dart';
+import 'landing_page.dart';
 import 'login_screen.dart';
 
 class FeedScreen extends StatefulWidget {
@@ -18,27 +20,76 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  TabBar get _tabBar => const TabBar(
-        tabs: [
-          Tab(
-            icon: Icon(Icons.home),
-            text: 'Home',
+  TabBar get _tabBar => TabBar(
+    tabs: [
+      Tab(
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.home),
+              Text('Home'),
+            ],
           ),
-          Tab(
-            icon: Icon(Icons.history),
-            text: 'History',
+        ),
+      ),
+      Tab(
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.history),
+              Text('History'),
+            ],
           ),
-        ],
-      );
+        ),
+      ),
+    ],
+  );
 
   TextEditingController prescriptionContent = TextEditingController();
 
   CollectionReference ref = FirebaseFirestore.instance.collection('notes');
   Uint8List? _image;
 
+  bool _isLoading = false;
+  var userData = {};
+
+  getData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      var userSnap = await FirebaseFirestore.instance
+          .collection('users data')
+          .doc(FirebaseAuth.instance.currentUser!.email.toString())
+          .get();
+
+      userData = userSnap.data()!;
+
+      // get post lENGTH
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getData();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return userData['role'] == 'Paitient'
+        ? MaterialApp(
       debugShowCheckedModeBanner: false,
       home: DefaultTabController(
         length: 2,
@@ -63,32 +114,27 @@ class _FeedScreenState extends State<FeedScreen> {
               'Medical Profile',
               style: TextStyle(fontSize: 15),
             ),
-            /*actions: [
-              ElevatedButton(
-                  style: ButtonStyle(
-                    padding: MaterialStateProperty.all(const EdgeInsets.all(5)),
-                  ),
-                  onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return const PrescriptionPage();
-                    }));
-                  },
-                  child: const Text('write prescription'))
-            ],*/
+            // actions: [
+            //   ElevatedButton(
+            //       style: ButtonStyle(
+            //         padding: MaterialStateProperty.all(const EdgeInsets.all(5)),
+            //       ),
+            //       onPressed: () {
+            //         Navigator.push(context,
+            //             MaterialPageRoute(builder: (context) {
+            //           return const PrescriptionPage();
+            //           //return const QrTest();
+            //         }));
+            //       },
+            //       child: const Text('write prescription'))
+            // ],
             bottom: PreferredSize(
               preferredSize: _tabBar.preferredSize,
               child: ColoredBox(
-                color: Colors.blueGrey,
+                color: Colors.teal.shade900,
                 child: _tabBar,
               ),
             ),
-            // actions: [
-            //   IconButton(
-            //       onPressed: () => Navigator.of(context).push(
-            //           MaterialPageRoute(builder: (_) => const SearchPage())),
-            //       icon: Icon(Icons.search)),
-            // ],
           ),
           drawer: Drawer(
             child: ListView(
@@ -98,27 +144,27 @@ class _FeedScreenState extends State<FeedScreen> {
                   decoration: const BoxDecoration(color: Colors.white),
                   accountName: Container(
                       child: const Text(
-                    'Ismail Sarwar',
-                    style: TextStyle(color: Colors.black),
-                  )),
+                        'Ismail Sarwar',
+                        style: TextStyle(color: Colors.black),
+                      )),
                   accountEmail: Container(
                       child: Text(
-                    FirebaseAuth.instance.currentUser!.email.toString(),
-                    style: const TextStyle(color: Colors.black),
-                  )),
+                        FirebaseAuth.instance.currentUser!.email.toString(),
+                        style: const TextStyle(color: Colors.black),
+                      )),
                   currentAccountPicture: Stack(
                     children: [
                       _image != null
                           ? CircleAvatar(
-                              radius: 64,
-                              backgroundImage: MemoryImage(_image!),
-                            )
+                        radius: 64,
+                        backgroundImage: MemoryImage(_image!),
+                      )
                           : const CircleAvatar(
-                              radius: 64,
-                              backgroundImage: NetworkImage(
-                                'https://thumbs.dreamstime.com/z/businessman-icon-image-male-avatar-profile-vector-glasses-beard-hairstyle-179728610.jpg',
-                              ),
-                            ),
+                        radius: 64,
+                        backgroundImage: NetworkImage(
+                          'https://thumbs.dreamstime.com/z/businessman-icon-image-male-avatar-profile-vector-glasses-beard-hairstyle-179728610.jpg',
+                        ),
+                      ),
                       Positioned(
                           bottom: -5,
                           left: 80,
@@ -133,9 +179,15 @@ class _FeedScreenState extends State<FeedScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                const ListTile(
-                  leading: Icon(Icons.notifications),
-                  title: Text('Notifications'),
+                ListTile(
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                          return Profile();
+                        }));
+                  },
+                  leading: const Icon(Icons.person),
+                  title: const Text('Profile'),
                 ),
                 const SizedBox(
                   height: 10,
@@ -146,8 +198,8 @@ class _FeedScreenState extends State<FeedScreen> {
                   onTap: () {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
-                      return const HistoryPage();
-                    }));
+                          return const HistoryPage();
+                        }));
                   },
                 ),
                 const SizedBox(
@@ -157,11 +209,11 @@ class _FeedScreenState extends State<FeedScreen> {
                   onTap: () {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
-                      return Profile();
-                    }));
+                          return ProfileUpdateScreen();
+                        }));
                   },
                   leading: const Icon(Icons.settings),
-                  title: const Text('Profile'),
+                  title: const Text('Update personal info'),
                 ),
                 const SizedBox(height: 10),
                 ListTile(
@@ -170,22 +222,24 @@ class _FeedScreenState extends State<FeedScreen> {
                     FirebaseAuth.instance.signOut();
                     Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) {
-                      return const LoginScreen();
-                    }));
+                          return const LoginScreen();
+                        }));
                   },
                   title: const Text('Logout'),
                 )
               ],
             ),
           ),
-          body: const TabBarView(
+          body:  TabBarView(
             children: [
-              HomePage(),
+              LandingPage(),
               HistoryPage(),
+              //PrescriptionCard(),
             ],
           ),
         ),
       ),
-    );
+    )
+        : DoctorScanPage();
   }
 }

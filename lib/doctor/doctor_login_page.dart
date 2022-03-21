@@ -1,12 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../prescription/prescription_page.dart';
+
 import '../resources/auth_methods.dart';
 import '../utills/color..dart';
 import '../utills/utils.dart';
 import '../widgets/textfield_input.dart';
+import 'docrtor_scan_page.dart';
 import 'doctor_sign_up_screen.dart';
+
+
 
 class DoctorLoginPage extends StatefulWidget {
   const DoctorLoginPage({Key? key}) : super(key: key);
@@ -37,7 +40,7 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
     );
     if (res == 'success') {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => PrescriptionPage()));
+          context, MaterialPageRoute(builder: (context) => const DoctorScanPage()));
     } else {
       showSnackBar(res, context);
     }
@@ -104,13 +107,13 @@ class _DoctorLoginPageState extends State<DoctorLoginPage> {
                   child: Container(
                     child: _isLoading
                         ? const Center(
-                            child: CircularProgressIndicator(
-                              color: primaryColor,
-                            ),
-                          )
+                      child: CircularProgressIndicator(
+                        color: primaryColor,
+                      ),
+                    )
                         : const Text(
-                            'Log In',
-                          ),
+                      'Log In',
+                    ),
                     width: double.infinity,
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(vertical: 12.0),

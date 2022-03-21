@@ -14,7 +14,7 @@ class _DetailsPageState extends State<DetailsPage> {
 
   void getData() async {
     DocumentSnapshot snap =
-        await FirebaseFirestore.instance.collection('notes').doc().get();
+    await FirebaseFirestore.instance.collection('notes').doc().get();
     setState(() {
       data = (snap.data() as Map<String, dynamic>)['content'];
     });

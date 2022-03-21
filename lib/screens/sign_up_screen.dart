@@ -1,7 +1,9 @@
 import 'dart:typed_data';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 import '../resources/auth_methods.dart';
 import '../utills/color..dart';
@@ -9,6 +11,7 @@ import '../utills/utils.dart';
 import '../widgets/textfield_input.dart';
 import 'feed_screen.dart';
 import 'login_screen.dart';
+
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -22,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _usernameController = TextEditingController();
   Uint8List? _image;
   bool _isLoading = false;
+  String textrole = '';
 
   @override
   void dispose() {
@@ -44,13 +48,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() {
       _isLoading = true;
     });
+
     String res = await AuthMethods().signUpUser(
-      email: _emailController.text,
-      password: _passwordController.text,
-      username: _usernameController.text,
-      bio: _bioController.text,
-      file: _image!,
-    );
+        email: _emailController.text,
+        password: _passwordController.text,
+        username: _usernameController.text,
+        bio: _bioController.text,
+        file: _image!,
+        textrole: textrole);
     setState(() {
       _isLoading = false;
     });
@@ -71,6 +76,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.teal.shade900,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Container(
@@ -96,20 +104,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     color: Colors.teal,
                     fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 Stack(
                   children: [
                     _image != null
                         ? CircleAvatar(
-                            radius: 64,
-                            backgroundImage: MemoryImage(_image!),
-                          )
+                      radius: 64,
+                      backgroundImage: MemoryImage(_image!),
+                    )
                         : const CircleAvatar(
-                            radius: 64,
-                            backgroundImage: NetworkImage(
-                              'https://thumbs.dreamstime.com/z/businessman-icon-image-male-avatar-profile-vector-glasses-beard-hairstyle-179728610.jpg',
-                            ),
-                          ),
+                      radius: 64,
+                      backgroundImage: NetworkImage(
+                        'https://thumbs.dreamstime.com/z/businessman-icon-image-male-avatar-profile-vector-glasses-beard-hairstyle-179728610.jpg',
+                      ),
+                    ),
                     Positioned(
                         bottom: -5,
                         left: 80,
@@ -126,7 +135,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextfieldInput(
                   textInputType: TextInputType.text,
                   textEditingController: _usernameController,
-                  hintText: 'Enter Your username',
+                  hintText: 'Enter Your Name',
                 ),
                 const SizedBox(
                   height: 20.0,
@@ -149,11 +158,30 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 const SizedBox(
                   height: 20.0,
                 ),
-                TextfieldInput(
-                  textInputType: TextInputType.text,
-                  textEditingController: _bioController,
-                  hintText: 'Enter your bio',
+                // TextfieldInput(
+                //   textInputType: TextInputType.text,
+                //   textEditingController: _bioController,
+                //   hintText: 'Enter your bio',
+                // ),
+                DropdownButtonFormField(
+                  decoration: const InputDecoration(
+                    labelText: 'Role',
+                  ),
+                  value: textrole.isNotEmpty ? textrole : null,
+                  items: <String>['Paitient', 'Doctor', 'Admin']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      child: Text(value),
+                      value: value,
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      textrole = value.toString();
+                    });
+                  },
                 ),
+
                 const SizedBox(
                   height: 24.0,
                 ),
@@ -162,13 +190,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   child: Container(
                     child: _isLoading
                         ? const Center(
-                            child: CircularProgressIndicator(
-                              color: primaryColor,
-                            ),
-                          )
+                      child: CircularProgressIndicator(
+                        color: primaryColor,
+                      ),
+                    )
                         : const Text(
-                            'Sign up',
-                          ),
+                      'Sign up',
+                    ),
                     width: double.infinity,
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(vertical: 12.0),

@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../lab_admin/pdf_viewer.dart';
-import '../resources/firebase_api.dart';
-import 'details_page.dart';
-import 'package:path/path.dart';
+import '../utills/color..dart';
+import '../widgets/prescription_card.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({Key? key}) : super(key: key);
@@ -26,53 +26,59 @@ class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.green,
-        title: const Text('Prescription '),
-      ),
-      body: StreamBuilder(
-        stream: ref.snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          return Container(
-            margin: const EdgeInsets.all(20),
-            child: ListView(
-              children: snapshot.data!.docs.map((appointments) {
-                // return Container(
-                //   child: Center(child: Text(notes['content'])),
-                // );
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) {
-                      return const DetailsPage();
-                    }));
-                  },
-                  child: Card(
-                    elevation: 30,
-                    child: ListTile(
-                      onTap: () async {
-                        const url = 'files/vaccine certificate.pdf';
-                        final file = await FirebaseApi.loadFirebase(url);
-
-                        if (file == null) return;
-                        openPDF(context, file);
-                      },
-                      title: const Text('Date and time'),
-                      tileColor: Colors.blue.shade500,
-                    ),
+      // appBar: AppBar(
+      //   backgroundColor: Colors.teal.shade700,
+      //   title: const Text(
+      //     'Prescriptions ',
+      //     textAlign: TextAlign.center,
+      //     style: TextStyle(color: primaryColor),
+      //   ),
+      // ),
+        body: NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => [
+            SliverAppBar(
+              backgroundColor: Colors.teal.shade700,
+              floating: true,
+              snap: true,
+              title: const Text(
+                "Prescriptions",
+                style: TextStyle(color: primaryColor),
+              ),
+            ),
+          ],
+          body: StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('users data')
+                .doc(FirebaseAuth.instance.currentUser!.email.toString())
+                .collection('appoinments')
+                .snapshots(),
+            builder: (context,
+                AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: Color.fromARGB(255, 31, 124, 34),
+                    backgroundColor: Colors.grey,
+                    strokeWidth: 10,
                   ),
                 );
-              }).toList(),
-            ),
-          );
-        },
-      ),
-    );
+              }
+
+              return ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                itemBuilder: (ctx, index) => Container(
+                  child: PrescriptionCard(
+                    snap: snapshot.data!.docs[index].data(),
+                  ),
+                ),
+              );
+            },
+          ),
+        ));
   }
 }

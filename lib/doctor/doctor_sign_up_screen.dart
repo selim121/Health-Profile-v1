@@ -1,14 +1,16 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../resources/auth_methods.dart';
-import '../screens/feed_screen.dart';
 import '../screens/login_screen.dart';
 import '../utills/color..dart';
 import '../utills/utils.dart';
 import '../widgets/textfield_input.dart';
+import 'docrtor_scan_page.dart';
+
 
 class DoctorSignUpPage extends StatefulWidget {
   @override
@@ -59,7 +61,7 @@ class _DoctorSignUpPageState extends State<DoctorSignUpPage> {
       showSnackBar(res, context);
     } else {
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => FeedScreen()));
+          context, MaterialPageRoute(builder: (context) => const DoctorScanPage()));
     }
   }
 
@@ -101,15 +103,15 @@ class _DoctorSignUpPageState extends State<DoctorSignUpPage> {
                   children: [
                     _image != null
                         ? CircleAvatar(
-                            radius: 64,
-                            backgroundImage: MemoryImage(_image!),
-                          )
+                      radius: 64,
+                      backgroundImage: MemoryImage(_image!),
+                    )
                         : const CircleAvatar(
-                            radius: 64,
-                            backgroundImage: NetworkImage(
-                              'https://thumbs.dreamstime.com/z/businessman-icon-image-male-avatar-profile-vector-glasses-beard-hairstyle-179728610.jpg',
-                            ),
-                          ),
+                      radius: 64,
+                      backgroundImage: NetworkImage(
+                        'https://thumbs.dreamstime.com/z/businessman-icon-image-male-avatar-profile-vector-glasses-beard-hairstyle-179728610.jpg',
+                      ),
+                    ),
                     Positioned(
                         bottom: -5,
                         left: 80,
@@ -162,13 +164,13 @@ class _DoctorSignUpPageState extends State<DoctorSignUpPage> {
                   child: Container(
                     child: _isLoading
                         ? const Center(
-                            child: CircularProgressIndicator(
-                              color: primaryColor,
-                            ),
-                          )
+                      child: CircularProgressIndicator(
+                        color: primaryColor,
+                      ),
+                    )
                         : const Text(
-                            'Sign up',
-                          ),
+                      'Sign up',
+                    ),
                     width: double.infinity,
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(vertical: 12.0),

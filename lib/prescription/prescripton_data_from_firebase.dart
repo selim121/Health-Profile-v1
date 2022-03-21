@@ -42,8 +42,8 @@ class _PrescriptionDataFromFirebseState
                   onTap: () {
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) {
-                      return DetailsPage();
-                    }));
+                          return DetailsPage();
+                        }));
                   },
                   child: Card(
                     elevation: 30,
