@@ -1,4 +1,3 @@
-Health Profile v1
 This project was my final year graduation project.So the idea of this project was creating an app where we can store our medical history and creating  a place where a doctor can write prescriptoin digitally to his patients .
 
 There are total 3 role in this app. 
